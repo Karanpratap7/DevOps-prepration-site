@@ -10,4 +10,4 @@ Dive right into the interactive study guide here:
 
 ---
 
-*Developed autonomously with a dark cinematic aesthetic to make your exam prep visually stunning and in-depth.*
+*Developed to make your exam prep visually stunning and in-depth.*
