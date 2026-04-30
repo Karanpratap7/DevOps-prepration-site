@@ -1,0 +1,2132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevOps CSE3253 | Study Guide</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Space+Mono:wght@400;700&display=swap"
+    rel="stylesheet">
+
+  <!-- PrismJS Theme (Dark) -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --text: #f0ede8;
+      --text-muted: #888888;
+      --accent: #4F8EF7;
+      --border: rgba(240, 237, 232, 0.1);
+
+      --mark-3: #4F8EF7;
+      /* Blue */
+      --mark-5: #4caf50;
+      /* Green */
+      --mark-8: #ff9800;
+      /* Amber */
+      --mark-10: #f44336;
+      /* Red */
+
+      --font-sans: 'Inter', sans-serif;
+      --font-serif: 'Playfair Display', serif;
+      --font-mono: 'Space Mono', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: auto;
+      /* GSAP will handle scroll logic if needed, but smooth scrolling for anchors */
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      overflow-x: hidden;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Noise Texture Overlay */
+    body::after {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.04;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    ::selection {
+      background: var(--text);
+      color: var(--bg);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #333;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+
+    /* Loader */
+    .loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: var(--bg);
+      z-index: 10000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      color: var(--text);
+    }
+
+    .loader-counter {
+      font-family: var(--font-mono);
+      font-size: 6rem;
+      font-weight: 300;
+    }
+
+    /* Canvas */
+    #bg-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    #hero-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* Progress Bar */
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 2px;
+      background: var(--accent);
+      width: 0%;
+      z-index: 9998;
+    }
+
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 2rem 4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 9990;
+      mix-blend-mode: difference;
+    }
+
+    .nav-logo {
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      font-style: italic;
+      text-transform: uppercase;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      text-decoration: none;
+      color: var(--text);
+      position: relative;
+      padding-bottom: 4px;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0%;
+      height: 1px;
+      background: var(--text);
+      transition: width 0.3s ease;
+    }
+
+    .nav-links a:hover::after,
+    .nav-links a.active::after {
+      width: 100%;
+    }
+
+    .hamburger {
+      display: none;
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+    }
+
+    /* Mobile Menu */
+    .mobile-menu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: var(--bg);
+      z-index: 9995;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transform: translateY(-100%);
+      transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+
+    .mobile-menu.active {
+      transform: translateY(0);
+    }
+
+    .mobile-menu a {
+      font-family: var(--font-serif);
+      font-size: 3rem;
+      text-decoration: none;
+      color: var(--text);
+      margin: 1rem 0;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    /* Hero */
+    .hero {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-title-container {
+      display: flex;
+      gap: 2rem;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .hero-title {
+      font-family: var(--font-serif);
+      font-size: 15vw;
+      line-height: 1;
+      font-weight: 400;
+      margin: 0;
+      letter-spacing: -0.05em;
+    }
+
+    .subtitle {
+      position: absolute;
+      bottom: 4rem;
+      left: 4rem;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      max-width: 300px;
+      z-index: 2;
+    }
+
+    .subtitle span {
+      display: block;
+      overflow: hidden;
+    }
+
+    .subtitle span i {
+      display: block;
+      font-style: normal;
+      transform: translateY(100%);
+    }
+
+    /* Ticker */
+    .ticker-wrap {
+      width: 100%;
+      overflow: hidden;
+      background: var(--text);
+      color: var(--bg);
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .ticker {
+      display: inline-block;
+      white-space: nowrap;
+      animation: ticker 30s linear infinite;
+    }
+
+    .ticker-item {
+      margin: 0 2rem;
+    }
+
+    @keyframes ticker {
+      0% {
+        transform: translate3d(0, 0, 0);
+      }
+
+      100% {
+        transform: translate3d(-50%, 0, 0);
+      }
+    }
+
+    /* Main Content */
+    main {
+      position: relative;
+      z-index: 2;
+      padding-bottom: 10rem;
+    }
+
+    .module-section {
+      padding: 10rem 4rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      border-bottom: 1px solid var(--border);
+      opacity: 0;
+      /* For GSAP */
+    }
+
+    .module-section:nth-child(even) .module-header {
+      flex-direction: row-reverse;
+      text-align: right;
+    }
+
+    .module-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 4rem;
+      gap: 2rem;
+    }
+
+    .module-id {
+      font-family: var(--font-mono);
+      font-size: 1.2rem;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .module-title {
+      font-family: var(--font-serif);
+      font-size: 5rem;
+      line-height: 1.1;
+      font-weight: 400;
+    }
+
+    .module-summary {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 400px;
+      font-weight: 300;
+    }
+
+    /* Q&A Cards */
+    .qa-container {
+      display: grid;
+      gap: 2rem;
+    }
+
+    .card {
+      background: rgba(10, 10, 10, 0.6);
+      border: 1px solid var(--border);
+      padding: 2.5rem;
+      border-radius: 4px;
+      backdrop-filter: blur(10px);
+      transition: box-shadow 0.3s ease, border-color 0.3s ease;
+      transform-style: preserve-3d;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .card:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      pointer-events: none;
+      transform: translateZ(30px);
+    }
+
+    .question {
+      font-size: 1.4rem;
+      font-weight: 500;
+      max-width: 80%;
+      font-family: var(--font-sans);
+    }
+
+    .badge {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      padding: 0.3rem 0.8rem;
+      border-radius: 50px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid;
+      font-weight: 700;
+    }
+
+    .badge-3 {
+      color: var(--mark-3);
+      border-color: var(--mark-3);
+      box-shadow: 0 0 10px rgba(79, 142, 247, 0.2);
+    }
+
+    .badge-5 {
+      color: var(--mark-5);
+      border-color: var(--mark-5);
+      box-shadow: 0 0 10px rgba(76, 175, 80, 0.2);
+    }
+
+    .badge-8 {
+      color: var(--mark-8);
+      border-color: var(--mark-8);
+      box-shadow: 0 0 10px rgba(255, 152, 0, 0.2);
+    }
+
+    .badge-10 {
+      color: var(--mark-10);
+      border-color: var(--mark-10);
+      box-shadow: 0 0 10px rgba(244, 67, 54, 0.2);
+    }
+
+    .answer-wrapper {
+      height: 0;
+      overflow: hidden;
+      transition: height 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: translateZ(20px);
+    }
+
+    .answer-content {
+      padding-top: 2rem;
+      color: var(--text-muted);
+      font-weight: 300;
+      font-size: 1rem;
+    }
+
+    .answer-content p {
+      margin-bottom: 1rem;
+      position: relative;
+      padding-left: 1.5rem;
+    }
+
+    .answer-content p::before {
+      content: '>';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-family: var(--font-mono);
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0;
+      }
+    }
+
+    /* Code Blocks */
+    pre {
+      background: #111 !important;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1.5rem !important;
+      margin-top: 1.5rem !important;
+      position: relative;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      padding: 0.3rem 0.6rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      color: var(--text);
+      border-color: var(--text);
+    }
+
+    /* Footer */
+    footer {
+      padding: 4rem;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+    }
+
+    /* Transitions overlay */
+    .transition-flash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+      z-index: 10001;
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      nav {
+        padding: 1.5rem 2rem;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .hamburger {
+        display: block;
+      }
+
+      .hero-title {
+        font-size: 20vw;
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .hero-title-container {
+        flex-direction: column;
+        gap: 0;
+      }
+
+      .subtitle {
+        left: 2rem;
+        bottom: 2rem;
+      }
+
+      .module-section {
+        padding: 6rem 2rem;
+      }
+
+      .module-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        text-align: left !important;
+      }
+
+      .module-title {
+        font-size: 3rem;
+      }
+
+      .card {
+        padding: 1.5rem;
+      }
+
+      .question {
+        font-size: 1.1rem;
+      }
+
+      .card-header {
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+
+    /* Diagrams & Images */
+    .content-image {
+      width: 100%;
+      max-width: 800px;
+      border-radius: 4px;
+      margin: 2rem 0;
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      display: block;
+    }
+
+    .mermaid {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 2rem;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      margin: 2rem 0;
+      overflow-x: auto;
+      text-align: center;
+    }
+
+    .mermaid svg {
+      max-width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Flash transition element -->
+  <div class="transition-flash"></div>
+
+  <!-- Progress Bar -->
+  <div class="progress-bar"></div>
+
+  <!-- Loader -->
+  <div class="loader">
+    <div class="loader-counter">000</div>
+  </div>
+
+  <!-- Global Background Canvas -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- Navigation -->
+  <nav>
+    <div class="nav-logo">CSE3253</div>
+    <ul class="nav-links">
+      <li><a href="#m1">M1</a></li>
+      <li><a href="#m2">M2</a></li>
+      <li><a href="#m3">M3</a></li>
+      <li><a href="#m4">M4</a></li>
+      <li><a href="#m5">M5</a></li>
+      <li><a href="#m6">M6</a></li>
+      <li><a href="#m7">M7</a></li>
+    </ul>
+    <div class="hamburger">[ MENU ]</div>
+  </nav>
+
+  <!-- Mobile Menu Overlay -->
+  <div class="mobile-menu">
+    <a href="#m1" class="menu-link">Module 1</a>
+    <a href="#m2" class="menu-link">Module 2</a>
+    <a href="#m3" class="menu-link">Module 3</a>
+    <a href="#m4" class="menu-link">Module 4</a>
+    <a href="#m5" class="menu-link">Module 5</a>
+    <a href="#m6" class="menu-link">Module 6</a>
+    <a href="#m7" class="menu-link">Module 7</a>
+  </div>
+
+  <!-- Hero Section -->
+  <header class="hero">
+    <canvas id="hero-canvas"></canvas>
+    <div class="hero-title-container">
+      <h1 class="hero-title dev-text">DEV</h1>
+      <h1 class="hero-title ops-text">OPS</h1>
+    </div>
+    <div class="subtitle">
+      <span><i>Comprehensive Exam</i></span>
+      <span><i>Study Guide / 2026</i></span>
+      <span><i>Manipal University Jaipur</i></span>
+    </div>
+  </header>
+
+
+
+  <main>
+
+        <!-- MODULE 1 -->
+        <section id="m1" class="module-section">
+            <div class="module-header">
+                <div>
+                    <span class="module-id">MODULE 01</span>
+                    <h2 class="module-title scramble" data-text="Introduction to DevOps & Ecosystem">Introduction to DevOps & Ecosystem</h2>
+                </div>
+                <div class="module-summary">
+                    <p>DevOps = Development + Operations. A culture, movement, and practice emphasizing collaboration between software developers and IT operations.</p>
+<ul>
+<li><strong>CALMS Framework:</strong> Culture, Automation, Lean, Measurement, Sharing</li>
+<li><strong>Delivery Pipeline:</strong> Plan → Code → Build → Test → Release → Deploy → Operate → Monitor (continuous loop)</li>
+<li><strong>Ecosystem Tools:</strong> Git (VCS) · Jenkins (CI) · Selenium (CT) · Docker + Kubernetes (CD) · Puppet + Ansible (CM) · Nagios (Monitoring) · AWS/Azure/GCP (Cloud)</li>
+</ul>
+
+                </div>
+            </div>
+            <div class="qa-container">
+    
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">Define DevOps and list its core principles.</h3>
+                        <span class="badge badge-3">3 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <p>DevOps is a collaborative approach integrating software development (Dev) and IT operations (Ops) to shorten the software development life cycle. Core principles follow the CALMS framework: Culture (shared responsibility), Automation (reduce manual tasks), Lean (eliminate waste), Measurement (track everything), and Sharing (open communication). The goal is faster, reliable delivery of software.</p>
+
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">What are the key skills required in the DevOps domain?</h3>
+                        <span class="badge badge-3">3 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <p>Key DevOps skills:</p>
+                            <ol>
+                            <li>Version control – Git</li>
+                            <li>CI/CD tools – Jenkins, GitLab CI</li>
+                            <li>Containerization – Docker, Kubernetes</li>
+                            <li>Configuration management – Puppet, Ansible, Chef</li>
+                            <li>Cloud platforms – AWS, Azure, GCP</li>
+                            <li>Scripting – Python, Bash</li>
+                            <li>Monitoring – Nagios, Prometheus</li>
+                            <li>Agile/Scrum practices.</li>
+                            </ol>
+
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">Explain the DevOps delivery pipeline and its stages.</h3>
+                        <span class="badge badge-5">5 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <p>The DevOps delivery pipeline is a set of automated processes that move code from development to production:</p>
+                            <img src="assets/devops_loop.png" alt="DevOps Infinity Loop" class="content-image">
+<ol>
+<li>Plan – Define features, tasks (Jira)</li>
+<li>Code – Developers write and commit (Git)</li>
+<li>Build – Compile automatically (Maven, Gradle)</li>
+<li>Test – Automated testing (Selenium, JUnit)</li>
+<li>Release – Approve version for deployment</li>
+<li>Deploy – Push to production (Docker, Kubernetes)</li>
+<li>Operate – Manage infrastructure</li>
+<li>Monitor – Observe performance (Nagios, Grafana)</li>
+</ol>
+<p>Each stage feeds back into the next, enabling a continuous loop of rapid, reliable delivery.</p>
+                            <div class="mermaid">
+                                graph LR
+                                    A[Plan] --> B[Code]
+                                    B --> C[Build]
+                                    C --> D[Test]
+                                    D --> E[Release]
+                                    E --> F[Deploy]
+                                    F --> G[Operate]
+                                    G --> H[Monitor]
+                                    H -.Feedback.-> A
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">Describe DevOps market trends and the demand for DevOps skills.</h3>
+                        <span class="badge badge-5">5 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <p>Current trends:</p>
+                            <ol>
+                            <li>Shift to cloud-native DevOps on AWS/Azure/GCP</li>
+                            <li>GitOps — Git as single source of truth for infrastructure</li>
+                            <li>DevSecOps — integrating security into the pipeline</li>
+                            <li>AIOps — AI for predictive monitoring</li>
+                            <li>Microservices and containerization becoming standard.</li>
+                            </ol>
+                            <p>Companies seek engineers proficient in CI/CD, containers, and cloud — DevOps engineers command premium salaries due to cross-functional expertise.</p>
+
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">What is the DevOps ecosystem? Explain the key tools used across the DevOps lifecycle.</h3>
+                        <span class="badge badge-8">8 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <p>The DevOps ecosystem is a collection of tools and practices supporting the entire software delivery lifecycle:</p>
+<ol>
+<li>Source Control: Git, GitHub, Bitbucket</li>
+<li>CI Tools: Jenkins, GitLab CI</li>
+<li>Continuous Testing: Selenium, JUnit, TestNG</li>
+<li>Containerization: Docker (packaging) + Kubernetes (orchestration)</li>
+<li>Configuration Management: Puppet, Ansible, Chef</li>
+<li>Monitoring: Nagios, Prometheus, Grafana</li>
+<li>Artifact Repository: Nexus, JFrog Artifactory</li>
+<li>Cloud Platforms: AWS (CodePipeline, ECS), Azure (DevOps, AKS), GCP (Cloud Build, GKE)</li>
+</ol>
+<p>These tools form an integrated toolchain that supports automation, collaboration, and rapid feedback.</p>
+
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">Explain DevOps culture and its evolution from traditional software development models. How does it differ from Waterfall and Agile?</h3>
+                        <span class="badge badge-10">10 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <p>Traditional Waterfall: sequential approach (requirements → design → dev → test → deploy), taking months/years. Clear wall between Dev and Ops causing "works on my machine" problem.</p>
+<p>Agile improved this with iterative sprints but still treated deployment separately.</p>
+<p>DevOps Evolution:</p>
+<ul>
+<li>2009: Patrick Debois coined "DevOps" at Agile Conference</li>
+<li>2010s: Tools like Jenkins, Docker, Puppet popularized automation</li>
+<li>Today: Cloud-native DevOps is mainstream</li>
+</ul>
+<p>Key Differences:</p>
+<ul>
+<li>Waterfall vs DevOps: linear/slow/siloed vs continuous/fast/collaborative</li>
+<li>Agile vs DevOps: iterative development vs Agile + continuous delivery and operations</li>
+</ul>
+<p>DevOps culture requires:</p>
+<ol>
+<li>Shared ownership — Dev and Ops both responsible for production</li>
+<li>Blameless postmortems — focus on learning, not blame</li>
+<li>Automation-first mindset</li>
+<li>Continuous improvement through feedback loops</li>
+<li>Transparency — shared dashboards, metrics</li>
+</ol>
+<p>Business benefits (DORA metrics): 200x more frequent deployments · 24x faster recovery from failures · 3x lower change failure rate. Companies like Netflix, Amazon, and Google deploy thousands of times per day.</p>
+
+                        </div>
+                    </div>
+                </div>
+        
+            </div>
+        </section>
+    
+        <!-- MODULE 2 -->
+        <section id="m2" class="module-section">
+            <div class="module-header">
+                <div>
+                    <span class="module-id">MODULE 02</span>
+                    <h2 class="module-title scramble" data-text="Version Control & Agile Practices">Version Control & Agile Practices</h2>
+                </div>
+                <div class="module-summary">
+                    <ul>
+<li><strong>Git Essential Commands:</strong> `git init` · `git clone <url>` · `git add .` · `git commit -m "msg"` · `git push origin main` · `git pull` · `git branch <name>` · `git checkout <branch>` · `git merge <branch>` · `git status` · `git log`</li>
+<li><strong>Branching Strategies:</strong> Feature Branch · Gitflow (main/develop/feature/release/hotfix) · Trunk-Based Development</li>
+<li><strong>Merge types:</strong> Fast-forward · 3-way merge · Rebase</li>
+<li><strong>Agile Principles:</strong> Individuals over processes · Working software over docs · Customer collaboration · Responding to change</li>
+<li><strong>Scrum ceremonies:</strong> Sprint Planning · Daily Standup · Sprint Review · Retrospective</li>
+</ul>
+
+                </div>
+            </div>
+            <div class="qa-container">
+    
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">What is version control? Differentiate between centralized and distributed VCS.</h3>
+                        <span class="badge badge-3">3 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <p>Version Control System (VCS) tracks changes to files over time, allowing multiple people to collaborate and revert to previous versions.</p>
+<ul>
+<li>Centralized VCS (SVN): single central server; developers check out/in. Risk: single point of failure.</li>
+<li>Distributed VCS (Git): every developer has a full local copy of entire history. Faster, works offline, no single point of failure.</li>
+</ul>
+
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">List and explain five essential Git commands.</h3>
+                        <span class="badge badge-3">3 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <ol>
+<li>`git init` — initializes a new Git repository</li>
+<li>`git clone <url>` — copies a remote repository to local machine</li>
+<li>`git add .` — stages all modified files for next commit</li>
+<li>`git commit -m 'message'` — saves staged changes with a message</li>
+<li>`git push origin main` — uploads local commits to remote repository</li>
+</ol>
+
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">Explain Git branching strategies used in team-based development.</h3>
+                        <span class="badge badge-5">5 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <ol>
+<li>Feature Branch Workflow: each feature/bug gets its own branch, merged into main when done.</li>
+<li>Gitflow: main (production) · develop (integration) · feature/* · release/* · hotfix/*</li>
+<li>Trunk-Based Development: all developers commit to one main branch using feature flags. Used by Google and Facebook.</li>
+</ol>
+<p>Best practice: small, short-lived branches merged frequently reduce merge conflicts and enable CI.</p>
+
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">How do you resolve merge conflicts in Git?</h3>
+                        <span class="badge badge-5">5 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <p>A merge conflict occurs when two branches modify the same part of a file differently.</p>
+<p>Steps:</p>
+<ol>
+<li>`git merge <branch>` — attempt the merge</li>
+<li>Git marks conflicts: `<<<<<<< HEAD` / your change / `=======` / their change / `>>>>>>> feature-branch`</li>
+<li>Manually edit the file to keep correct version</li>
+<li>`git add <file>` — mark as resolved</li>
+<li>`git commit` — complete the merge</li>
+</ol>
+<p>Tools: VS Code, IntelliJ, `git mergetool` provide visual conflict resolution.</p>
+
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">Explain Git workflows. Compare Gitflow vs Trunk-Based Development.</h3>
+                        <span class="badge badge-8">8 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <p>Gitflow (Vincent Driessen): branches: main, develop, feature, release, hotfix. Structured, clear release cycle, good for versioned products. Cons: complex, long-lived branches, slower CI.</p>
+<p>Trunk-Based Development: all commits go to trunk/main. Feature flags hide incomplete features. Short-lived branches (< 1 day). Enables true CI, fast feedback, fewer merge issues.</p>
+<p>GitHub Flow: simplified — main branch + feature branches + pull requests. Deploy from main directly. Best for web apps with continuous deployment.</p>
+<p>Choice: large enterprise products with scheduled releases → Gitflow. SaaS products with continuous delivery → Trunk-based.</p>
+                            <div class="mermaid">
+                                gitGraph
+                                    commit id: "Initial commit"
+                                    branch develop
+                                    checkout develop
+                                    commit id: "Setup project"
+                                    branch feature/auth
+                                    checkout feature/auth
+                                    commit id: "Add login"
+                                    commit id: "Add JWT"
+                                    checkout develop
+                                    merge feature/auth
+                                    branch release/1.0
+                                    checkout release/1.0
+                                    commit id: "Bump version"
+                                    checkout main
+                                    merge release/1.0 tag: "v1.0.0"
+                                    checkout develop
+                                    merge release/1.0
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">Explain Agile software development and its integration with DevOps. Describe Scrum framework in detail.</h3>
+                        <span class="badge badge-10">10 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <p>Agile (Agile Manifesto, 2001) values: Individuals and interactions · Working software · Customer collaboration · Responding to change.</p>
+<p>Scrum Roles: Product Owner (defines backlog) · Scrum Master (facilitates, removes blockers) · Development Team (cross-functional, 3–9 people)</p>
+<p>Scrum Artifacts: Product Backlog · Sprint Backlog · Increment (shippable product)</p>
+<p>Scrum Ceremonies: Sprint Planning · Daily Standup (15 min) · Sprint Review (demo to stakeholders) · Retrospective (process improvement)</p>
+<p>Agile + DevOps Integration: Agile drives development iteration; DevOps drives deployment automation. CI/CD pipelines automate the Agile "definition of done" (code → tested → deployed). Sprint deliverables automatically flow through the DevOps pipeline.</p>
+<p>Result: Organizations like Spotify (Squads, Tribes model) deploy hundreds of times per day with small autonomous teams.</p>
+
+                        </div>
+                    </div>
+                </div>
+        
+            </div>
+        </section>
+    
+        <!-- MODULE 3 -->
+        <section id="m3" class="module-section">
+            <div class="module-header">
+                <div>
+                    <span class="module-id">MODULE 03</span>
+                    <h2 class="module-title scramble" data-text="Continuous Integration with Jenkins">Continuous Integration with Jenkins</h2>
+                </div>
+                <div class="module-summary">
+                    <ul>
+<li><strong>CI:</strong> Practice of automatically building and testing code on every commit to the shared repository.</li>
+<li><strong>Jenkins Architecture:</strong> Master (UI, job scheduling, plugins) + Agents/Slaves (execute builds)</li>
+<li><strong>Jenkinsfile example:</strong> `pipeline { agent any; stages { stage('Build') { steps { sh 'mvn compile' } } stage('Test') { steps { sh 'mvn test' } } } }`</li>
+<li><strong>Key Plugins:</strong> Git Plugin · Maven Plugin · Pipeline Plugin · Blue Ocean UI</li>
+</ul>
+
+                </div>
+            </div>
+            <div class="qa-container">
+    
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">What is Continuous Integration? State its key benefits.</h3>
+                        <span class="badge badge-3">3 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <p>CI is a DevOps practice where developers frequently merge code into a shared repository (multiple times/day). Each merge triggers automated build and test.</p>
+<p>Benefits:</p>
+<ol>
+<li>Early detection of integration bugs</li>
+<li>Reduces "integration hell"</li>
+<li>Always have a working build</li>
+<li>Faster feedback</li>
+<li>Improved code quality.</li>
+</ol>
+
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">What is Jenkins? Explain its architecture.</h3>
+                        <span class="badge badge-3">3 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <p>Jenkins is an open-source automation server for CI/CD. Master-Agent architecture:</p>
+<ul>
+<li>Master: hosts web UI, manages configs, schedules jobs, distributes work</li>
+<li>Agents (Slaves): machines that execute build jobs, connect via SSH or JNLP</li>
+</ul>
+<p>Enables parallel builds. Extensible through 1800+ plugins.</p>
+
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">Explain the CI pipeline workflow with Jenkins and Git integration.</h3>
+                        <span class="badge badge-5">5 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <ol>
+<li>Developer commits code to Git</li>
+<li>Git webhook notifies Jenkins</li>
+<li>Jenkins pulls latest code (Git plugin)</li>
+<li>Build Stage: `mvn compile`</li>
+<li>Test Stage: `mvn test`, JUnit reports</li>
+<li>Report Stage: test reports, coverage (JaCoCo)</li>
+<li>Artifact Stage: package JAR/WAR/Docker image</li>
+<li>Notification: email/Slack on pass/fail</li>
+</ol>
+<p>Entire flow defined in Jenkinsfile stored in Git (Pipeline as Code).</p>
+
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">How do you configure and execute a basic CI pipeline in Jenkins? Explain with Jenkinsfile syntax.</h3>
+                        <span class="badge badge-8">8 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <p>Setup: Install Jenkins (port 8080) → install Git + Pipeline + Maven plugins → configure JDK/Maven paths → create new Pipeline job.</p>
+                            <img src="assets/cicd_pipeline.png" alt="CI/CD Pipeline" class="content-image">
+<p>Jenkinsfile (Declarative):</p>
+<pre><code class="language-bash">
+pipeline {
+  agent any
+  tools { maven 'Maven3' }
+  stages {
+    stage('Checkout') { steps { git 'https://github.com/user/repo.git' } }
+    stage('Build')    { steps { sh 'mvn clean compile' } }
+    stage('Test')     { steps { sh 'mvn test' }
+                        post { always { junit 'target/surefire-reports/*.xml' } } }
+    stage('Package')  { steps { sh 'mvn package' } }
+  }
+  post {
+    success { echo 'Build Successful!' }
+    failure { mail to:'dev@company.com', subject:'Build Failed' }
+  }
+}
+</code></pre>
+<p>Webhook: GitHub → Settings → Webhooks → Jenkins URL/github-webhook/</p>
+                            <div class="mermaid">
+                                flowchart TD
+                                    A[Developer Push] --> B[GitHub Webhook]
+                                    B --> C[Jenkins Checkout]
+                                    C --> D[Build & Unit Test]
+                                    D --> E{SonarQube Pass?}
+                                    E -- Yes --> F[Docker Build & Push]
+                                    E -- No --> X[Fail Pipeline]
+                                    F --> G[K8s Deployment]
+                                    G --> H[Slack Notification]
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">What is Continuous Integration? Explain the complete CI workflow, Jenkins features, and how it supports DevOps practices.</h3>
+                        <span class="badge badge-10">10 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <p>CI Principles: single source repository · automate the build · self-testing build · every commit triggers build · fix broken builds immediately · keep build fast (< 10 min)</p>
+<p>Jenkins Features:</p>
+<ol>
+<li>Web-based UI</li>
+<li>Master-Agent distributed architecture</li>
+<li>1800+ plugins (Docker, Kubernetes, SonarQube, Slack)</li>
+<li>Pipeline as Code (Jenkinsfile in Git)</li>
+<li>Blue Ocean: modern pipeline visualization UI</li>
+<li>Role-based access control</li>
+<li>Build triggers: webhooks, cron, SCM polling, manual</li>
+<li>Build history and test trend analysis</li>
+</ol>
+<p>Complete CI Workflow:</p>
+<ol>
+<li>Developer writes code, runs local tests</li>
+<li>Commits to Git feature branch</li>
+<li>Creates Pull Request → peer review</li>
+<li>Merge to main → webhook fires Jenkins</li>
+<li>Jenkins: Clone → Build → Unit Test → Integration Test → Code Quality (SonarQube) → Package</li>
+<li>Artifacts stored in Nexus/Artifactory</li>
+<li>Pass: notify team; Fail: immediate alert</li>
+</ol>
+<p>Business value: bugs caught in CI cost 10x less to fix than in production. DORA research: high-performing teams have CI as foundational practice.</p>
+
+                        </div>
+                    </div>
+                </div>
+        
+            </div>
+        </section>
+    
+        <!-- MODULE 4 -->
+        <section id="m4" class="module-section">
+            <div class="module-header">
+                <div>
+                    <span class="module-id">MODULE 04</span>
+                    <h2 class="module-title scramble" data-text="Continuous Testing & Quality Assurance">Continuous Testing & Quality Assurance</h2>
+                </div>
+                <div class="module-summary">
+                    <ul>
+<li><strong>Selenium Components:</strong> Selenium IDE · Selenium RC (deprecated) · Selenium WebDriver · Selenium Grid</li>
+<li><strong>WebDriver Architecture:</strong> Test Script → WebDriver API → Browser Driver (ChromeDriver/GeckoDriver) → Browser</li>
+<li><strong>Testing Pyramid:</strong> Unit Tests (many, fast) → Integration Tests → UI/E2E Tests (few, slow)</li>
+<li><strong>Key Tools:</strong> Selenium (UI) · JUnit/TestNG (unit) · Cucumber (BDD) · Postman (API) · JMeter (performance)</li>
+</ul>
+
+                </div>
+            </div>
+            <div class="qa-container">
+    
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">Why is Continuous Testing important in DevOps?</h3>
+                        <span class="badge badge-3">3 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <p>In DevOps, code is deployed frequently. CT ensures quality at every pipeline stage without slowing delivery. Benefits:</p>
+                            <ol>
+                            <li>Immediate feedback after each commit</li>
+                            <li>Catches regressions early</li>
+                            <li>Enables confidence in continuous deployment</li>
+                            <li>Reduces manual testing effort</li>
+                            <li>Maintains "always shippable" codebase.</li>
+                            </ol>
+
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">What is Selenium WebDriver? Explain its architecture briefly.</h3>
+                        <span class="badge badge-3">3 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <p>Selenium WebDriver automates web browser interactions for testing.</p>
+<p>Architecture: Test Script (Java/Python/C#) → WebDriver API (JSON Wire Protocol / W3C) → Browser Driver (ChromeDriver/GeckoDriver) → Browser</p>
+
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">Compare Selenium with other web testing tools. When is Selenium the best choice?</h3>
+                        <span class="badge badge-5">5 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <ul>
+<li>Selenium vs Cypress: Selenium = all browsers + all languages; Cypress = JS-only, Chrome/Firefox, better DX</li>
+<li>Selenium vs Playwright (Microsoft): supports Chromium/Firefox/WebKit, auto-wait, better parallel testing</li>
+<li>Selenium vs QTP/UFT: Selenium = free/open-source/web-only; QTP = commercial/web+desktop</li>
+</ul>
+<p>Choose Selenium when: cross-browser testing required · team uses multiple languages · Jenkins CI integration needed · Selenium Grid for parallel testing across devices.</p>
+
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">Explain Selenium components and how automated test execution works in DevOps.</h3>
+                        <span class="badge badge-8">8 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <ol>
+<li>Selenium IDE: browser extension, record-and-playback, good for beginners</li>
+<li>Selenium WebDriver: core automation engine, direct browser communication via native APIs</li>
+<li>Selenium Grid: Hub (distributes tests) + Nodes (machines with specific browser/OS). Enables parallel execution.</li>
+</ol>
+<p>WebDriver flow: Test Code → WebDriver Interface → Remote WebDriver → Browser Driver → Browser</p>
+<p>CI Integration: Tests in Git → Jenkins triggers on build → Selenium Grid runs tests in parallel → JUnit XML results → Jenkins displays trends → Failed tests block deployment</p>
+<p>Testing Pyramid: Unit (70%, fast) · Integration (20%) · UI/E2E Selenium (10%, slowest, runs last)</p>
+
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">What is the role of testing in DevOps? Explain Continuous Testing strategy, tools, and CI/CD integration.</h3>
+                        <span class="badge badge-10">10 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <p>"Shift Left" testing: quality activity woven throughout the pipeline, not just at the end.</p>
+<p>Testing layers:</p>
+<ol>
+<li>Unit Testing: JUnit, pytest, Mocha — every commit, 80%+ coverage target</li>
+<li>Integration Testing: Spring Test, REST Assured</li>
+<li>UI/Functional (Selenium): E2E workflows in staging</li>
+<li>Performance: JMeter, Gatling — load and stress tests</li>
+<li>Security (DevSecOps): OWASP ZAP (DAST), SonarQube (SAST)</li>
+<li>Acceptance (BDD): Cucumber + Gherkin (Given/When/Then)</li>
+</ol>
+<p>CI/CD Pipeline flow:</p>
+<p>Commit → Unit Tests (1 min) → Code Quality (SonarQube) → Integration Tests (5 min) → Build Artifact → Deploy to Staging → Selenium E2E (15 min) → Performance Tests → Deploy to Production</p>
+<p>Key metrics: test pass rate · code coverage % · test execution time · defect escape rate</p>
+<p>Business impact: mature CT practices → 10x fewer production incidents, 50% lower cost of quality.</p>
+
+                        </div>
+                    </div>
+                </div>
+        
+            </div>
+        </section>
+    
+        <!-- MODULE 5 -->
+        <section id="m5" class="module-section">
+            <div class="module-header">
+                <div>
+                    <span class="module-id">MODULE 05</span>
+                    <h2 class="module-title scramble" data-text="Continuous Deployment, Docker & Kubernetes">Continuous Deployment, Docker & Kubernetes</h2>
+                </div>
+                <div class="module-summary">
+                    <ul>
+<li><strong>Docker Commands:</strong> `docker pull` · `docker build -t name .` · `docker run -d -p 8080:8080 name` · `docker ps` · `docker stop` · `docker push` · `docker images`</li>
+<li><strong>Dockerfile order:</strong> FROM → WORKDIR → COPY → RUN → EXPOSE → CMD</li>
+<li><strong>Kubernetes Objects:</strong> Pod → ReplicaSet → Deployment → Service → Ingress → Namespace</li>
+<li><strong>kubectl:</strong> `kubectl apply -f deploy.yaml` · `kubectl get pods` · `kubectl scale` · `kubectl describe pod`</li>
+</ul>
+
+                </div>
+            </div>
+            <div class="qa-container">
+    
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">Differentiate between virtual machines and containers.</h3>
+                        <span class="badge badge-3">3 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <ul>
+<li>VMs: virtualize entire hardware (hypervisor). Each VM has full OS (GBs). Slow start (minutes). High resource overhead.</li>
+<li>Containers: virtualize at OS level via Docker Engine. Share host OS kernel. Lightweight (MBs). Start in seconds. Isolated via namespaces and cgroups.</li>
+</ul>
+<p>Key difference: VMs isolate at hardware level; containers isolate at OS process level. Containers are faster, more portable, resource-efficient.</p>
+
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">Explain the Docker container lifecycle.</h3>
+                        <span class="badge badge-3">3 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <ol>
+<li>Create: `docker create` (created, not running)</li>
+<li>Start: `docker start` (running)</li>
+<li>Pause: `docker pause` (process frozen)</li>
+<li>Stop: `docker stop` (SIGTERM → SIGKILL → exited)</li>
+<li>Kill: `docker kill` (immediate SIGKILL)</li>
+<li>Remove: `docker rm` (deleted from disk)</li>
+</ol>
+<p>Images are immutable; containers are running instances of images.</p>
+
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">Explain Docker architecture and how images are built and published.</h3>
+                        <span class="badge badge-5">5 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <p>Architecture:</p>
+<ul>
+<li>Docker Client: CLI communicates with Docker Daemon via REST API</li>
+<li>Docker Daemon (dockerd): manages images, containers, networks, volumes</li>
+<li>Docker Registry: stores images (Docker Hub public; AWS ECR/Azure ACR private)</li>
+</ul>
+<p>Dockerfile example:</p>
+<pre><code class="language-bash">
+FROM openjdk:11
+WORKDIR /app
+COPY target/app.jar .
+EXPOSE 8080
+CMD ["java", "-jar", "app.jar"]
+</code></pre>
+<p>Build: `docker build -t myapp:1.0 .`</p>
+<p>Tag: `docker tag myapp:1.0 username/myapp:1.0`</p>
+<p>Push: `docker push username/myapp:1.0`</p>
+<p>Pull & run anywhere: `docker run -d -p 8080:8080 username/myapp:1.0`</p>
+<p>Ensures "works on my machine = works everywhere."</p>
+
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">Explain Kubernetes architecture and how it orchestrates containers.</h3>
+                        <span class="badge badge-8">8 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <p>Control Plane (Master):</p>
+                            <div class="mermaid">
+                                flowchart TD
+                                    subgraph Control Plane
+                                        API[API Server]
+                                        ETCD[etcd]
+                                        SCHED[Scheduler]
+                                        CM[Controller Manager]
+                                        API <--> ETCD
+                                        API <--> SCHED
+                                        API <--> CM
+                                    end
+                                    subgraph Worker Node 1
+                                        K1[Kubelet]
+                                        P1[Kube-proxy]
+                                        POD1[Pod A]
+                                        POD2[Pod B]
+                                        K1 --> POD1
+                                        K1 --> POD2
+                                    end
+                                    subgraph Worker Node 2
+                                        K2[Kubelet]
+                                        P2[Kube-proxy]
+                                        POD3[Pod C]
+                                        K2 --> POD3
+                                    end
+                                    API <--> K1
+                                    API <--> K2
+                            </div>
+<ul>
+<li>API Server: entry point for all kubectl commands</li>
+<li>etcd: key-value store for cluster state</li>
+<li>Scheduler: assigns pods to nodes based on resources</li>
+<li>Controller Manager: maintains desired state</li>
+</ul>
+<p>Worker Nodes:</p>
+<ul>
+<li>kubelet: agent communicating with master</li>
+<li>kube-proxy: handles network routing</li>
+<li>Container Runtime: Docker/containerd runs containers</li>
+</ul>
+<p>Key Objects:</p>
+<ul>
+<li>Pod: smallest unit, one or more containers sharing network/storage</li>
+<li>ReplicaSet: ensures N replicas always running</li>
+<li>Deployment: manages ReplicaSets, enables rolling updates</li>
+<li>Service: stable network endpoint (ClusterIP, NodePort, LoadBalancer)</li>
+<li>Ingress: HTTP routing, SSL termination</li>
+<li>ConfigMap/Secret: configuration injection</li>
+<li>Namespace: logical cluster isolation</li>
+</ul>
+<p>Example Deployment YAML:</p>
+<pre><code class="language-yaml">
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: myapp}
+spec:
+  replicas: 3
+  selector: {matchLabels: {app: myapp}}
+  template:
+    spec:
+      containers:
+      - name: myapp
+        image: myapp:1.0
+        ports: [{containerPort: 8080}]
+</code></pre>
+<p>Scaling: `kubectl scale deployment myapp --replicas=10`</p>
+
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">Explain Docker and Kubernetes together as a complete container ecosystem for Continuous Deployment.</h3>
+                        <span class="badge badge-10">10 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <p>Docker's Role: package app + dependencies in immutable image · Dockerfile defines environment · same image runs in dev/staging/prod</p>
+<p>Kubernetes' Role: runs Docker containers at scale · self-healing (restarts crashed containers) · horizontal scaling · rolling updates with zero downtime · load balancing · service discovery</p>
+<p>Full CD Pipeline:</p>
+<p>Code commit → Jenkins CI → Build Docker Image → Push to ECR → K8s Deployment → Rolling Update → Live</p>
+<p>Deployment Strategies:</p>
+<ol>
+<li>Rolling Update (default): replace old pods gradually, zero downtime</li>
+<li>Blue-Green: two environments, instant traffic switch</li>
+<li>Canary: 5% traffic to new version → test → 100%</li>
+</ol>
+<p>Kubernetes Features: HPA auto-scaling · Cluster autoscaler · Persistent Volumes · RBAC · Network Policies · Helm package manager</p>
+<p>Managed K8s: AWS EKS · Azure AKS · GCP GKE</p>
+<p>Production example: Netflix runs millions of containers on K8s, deploying hundreds of services multiple times per day.</p>
+
+                        </div>
+                    </div>
+                </div>
+        
+            </div>
+        </section>
+    
+        <!-- MODULE 6 -->
+        <section id="m6" class="module-section">
+            <div class="module-header">
+                <div>
+                    <span class="module-id">MODULE 06</span>
+                    <h2 class="module-title scramble" data-text="Configuration Management & Continuous Monitoring">Configuration Management & Continuous Monitoring</h2>
+                </div>
+                <div class="module-summary">
+                    <ul>
+<li><strong>Puppet:</strong> Master-Agent model. Master holds manifests (.pp files). Agents pull config every 30 min. Language: Puppet DSL.</li>
+<li><strong>Puppet Resource examples:</strong> `file { '/etc/motd': ensure => present }` · `package { 'nginx': ensure => installed }` · `service { 'nginx': ensure => running, enable => true }`</li>
+<li><strong>Nagios:</strong> Monitors hosts and services. NRPE runs checks on remote hosts. Alert states: OK / WARNING / CRITICAL / UNKNOWN</li>
+</ul>
+
+                </div>
+            </div>
+            <div class="qa-container">
+    
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">What is Configuration Management? Why is it important in DevOps?</h3>
+                        <span class="badge badge-3">3 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <p>CM is the process of systematically managing and maintaining the desired state of infrastructure and software. In DevOps, CM enables Infrastructure as Code (IaC) — treating server config like source code.</p>
+<p>Importance:</p>
+<ol>
+<li>Consistency — eliminate config drift</li>
+<li>Automation — provision hundreds of servers automatically</li>
+<li>Version control — track infra changes in Git</li>
+<li>Self-healing — enforce desired state continuously</li>
+<li>Disaster recovery — rebuild infrastructure from code.</li>
+</ol>
+<p>Tools: Puppet, Ansible, Chef, SaltStack.</p>
+
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">Explain Puppet's master-agent architecture.</h3>
+                        <span class="badge badge-3">3 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <p>Pull-based architecture:</p>
+<ul>
+<li>Puppet Master: central server holding manifests, certificates, modules</li>
+<li>Puppet Agent: installed on every managed node; every 30 min agents connect to master, request catalog (desired config), apply it</li>
+</ul>
+<p>Process: Agent sends facts (hostname, OS, IP) → Master compiles catalog → Agent applies resources → Agent sends report back</p>
+<p>Communication: SSL-encrypted. All nodes stay in desired state automatically.</p>
+
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">Write example Puppet manifests and explain how Puppet modules work.</h3>
+                        <span class="badge badge-5">5 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <pre><code class="language-puppet">
+# site.pp — Install and start nginx
+package { 'nginx': ensure => installed }
+service { 'nginx': ensure => running, enable => true, require => Package['nginx'] }
+file { '/etc/nginx/conf.d/myapp.conf':
+  ensure  => present,
+  content => template('nginx/myapp.conf.erb'),
+  notify  => Service['nginx'],
+}
+</code></pre>
+<p>Module structure: `manifests/init.pp` · `templates/` · `files/` · `tests/`</p>
+<p>Node Classification:</p>
+<pre><code class="language-puppet">
+node 'webserver01.company.com' { include nginx; include myapp }
+node 'dbserver01.company.com'  { include mysql }
+</code></pre>
+<p>Install community modules: `puppet module install puppetlabs-nginx`</p>
+
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">Explain Nagios architecture and how continuous monitoring is implemented.</h3>
+                        <span class="badge badge-8">8 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <p>Nagios Architecture:</p>
+<ul>
+<li>Nagios Core: central monitoring engine</li>
+<li>Plugins: scripts that check specific services (150+ built-in)</li>
+<li>NRPE: daemon on remote hosts running local checks</li>
+<li>Web UI: browser dashboard (port 80)</li>
+</ul>
+<p>States: OK (0) · WARNING (1) · CRITICAL (2) · UNKNOWN (3)</p>
+<p>NRPE Setup:</p>
+<ol>
+<li>Install on remote: `apt install nagios-nrpe-server nagios-plugins`</li>
+<li>Configure `/etc/nagios/nrpe.cfg`: `allowed_hosts=nagios-ip` · `command[check_disk]=/usr/lib/nagios/plugins/check_disk -w 20% -c 10%`</li>
+<li>On Nagios server define host and service using `check_nrpe!check_disk`</li>
+<li>`systemctl reload nagios`</li>
+</ol>
+<p>Notification:</p>
+<pre><code class="language-bash">
+define contact { contact_name admin; email admin@company.com; service_notification_commands notify-service-by-email }
+</code></pre>
+<p>Nagios monitors: HTTP response · disk space · CPU load · memory · MySQL · SMTP · SSH · custom apps</p>
+
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">Explain Configuration Management with Puppet and Continuous Monitoring with Nagios as part of the DevOps pipeline.</h3>
+                        <span class="badge badge-10">10 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <p>CM and Monitoring form the "Operate and Monitor" stages of DevOps.</p>
+<p><strong>Puppet:</strong></p>
+<p>Why: manual config doesn't scale; configuration drift causes inconsistency.</p>
+<p>Installation: `apt install puppetmaster` (master) + `apt install puppet` (agents) → sign certs: `puppet cert sign --all`</p>
+<p>Workflow: write manifest → `puppet parser validate` → push to master → agents pull and apply every 30 min</p>
+<p>Advanced: Hiera (data separation) · PuppetDB (facts and reports) · R10K (environment-based code deployment) · Puppet Enterprise (GUI)</p>
+<p><strong>Nagios:</strong></p>
+<p>Why: detect failures before users do · track trends · alert on-call engineers · SLA tracking</p>
+<p>Key Features: scheduled checks · dependency tracking · escalation policies (L1 → L2) · acknowledgement · downtime scheduling · performance graphs (PNP4Nagios/Grafana)</p>
+<p>Key Plugins: `check_http` · `check_ping` · `check_disk` · `check_load` · `check_mysql` · custom scripts returning 0/1/2/3</p>
+<p>Modern alternatives: Prometheus + Grafana (metrics) · ELK Stack (logs) · Datadog (SaaS)</p>
+<p>Integrated Pipeline:</p>
+<p>Puppet provisions servers consistently → App deployed via Docker/K8s → Nagios monitors health → Alerts engineers → Fix applied → CM enforces fix to all servers → Pipeline continues.</p>
+
+                        </div>
+                    </div>
+                </div>
+        
+            </div>
+        </section>
+    
+        <!-- MODULE 7 -->
+        <section id="m7" class="module-section">
+            <div class="module-header">
+                <div>
+                    <span class="module-id">MODULE 07</span>
+                    <h2 class="module-title scramble" data-text="Cloud Platforms & DevOps Services">Cloud Platforms & DevOps Services</h2>
+                </div>
+                <div class="module-summary">
+                    <ul>
+<li><strong>AWS:</strong> CodeCommit (Git) · CodeBuild (CI) · CodeDeploy (CD) · CodePipeline (orchestration) · ECR (container registry) · EKS (Kubernetes)</li>
+<li><strong>Azure:</strong> Azure Repos (Git) · Azure Pipelines (CI/CD) · Azure Container Registry · AKS (Kubernetes) · Azure Monitor · Azure Boards (Agile)</li>
+<li><strong>GCP:</strong> Cloud Source Repositories · Cloud Build · Cloud Deploy · Artifact Registry · GKE · Cloud Monitoring</li>
+<li><strong>Cloud models:</strong> IaaS (EC2, VMs) · PaaS (Elastic Beanstalk, App Service) · SaaS (Gmail, Office365)</li>
+</ul>
+
+                </div>
+            </div>
+            <div class="qa-container">
+    
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">What are cloud computing service models? Explain IaaS, PaaS, and SaaS with examples.</h3>
+                        <span class="badge badge-3">3 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <ul>
+<li>IaaS: virtualized compute, storage, network. User manages OS, runtime, apps. Examples: AWS EC2, Azure VMs, GCP Compute Engine. Use case: lift-and-shift migrations.</li>
+<li>PaaS: platform for developing/running apps without managing infrastructure. Examples: AWS Elastic Beanstalk, Azure App Service, GCP App Engine. Use case: focus on code, not infra.</li>
+<li>SaaS: complete software delivered over internet. Examples: Gmail, Salesforce, Microsoft 365. Use case: end users, no infra management.</li>
+</ul>
+
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">What are the advantages of implementing DevOps on cloud?</h3>
+                        <span class="badge badge-3">3 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <ol>
+                            <li>Elasticity — scale resources up/down automatically</li>
+                            <li>Managed services — AWS CodePipeline/Azure Pipelines handle CI/CD infra</li>
+                            <li>Global deployment — multiple regions in minutes</li>
+                            <li>Cost optimization — pay-as-you-go</li>
+                            <li>Built-in security (IAM, VPC, encryption)</li>
+                            <li>Integrated monitoring (CloudWatch, Azure Monitor)</li>
+                            <li>Faster time-to-market with pre-built toolchains</li>
+                            <li>High availability and disaster recovery built-in.</li>
+                            </ol>
+
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">Compare AWS DevOps services with Azure DevOps services.</h3>
+                        <span class="badge badge-5">5 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <p>AWS: CodeCommit (Git) · CodeBuild (CI) · CodeDeploy (deploy to EC2/Lambda/ECS) · CodePipeline (CI/CD orchestration) · ECR (container registry) · EKS (managed K8s) · CloudWatch (monitoring) · CloudFormation (IaC)</p>
+<p>Azure: Azure Repos (Git) · Azure Pipelines (CI/CD, YAML-based, multi-cloud) · Azure Artifacts (npm/Maven/NuGet) · Azure Boards (Agile) · Azure Container Registry · AKS · Azure Monitor + Application Insights · Bicep/ARM (IaC)</p>
+<p>Key difference: Azure DevOps is a single integrated suite; AWS DevOps is individual services composed together. Azure Pipelines supports multi-cloud; AWS tools are more AWS-native.</p>
+
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">Explain Google Cloud DevOps tools and how to design a cloud-based DevOps pipeline.</h3>
+                        <span class="badge badge-8">8 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <p>GCP Ecosystem: Cloud Source Repositories (Git) · Cloud Build (serverless CI/CD) · Artifact Registry (Docker/Maven/npm) · Cloud Deploy (managed CD to GKE/Cloud Run) · GKE (managed K8s) · Cloud Run (serverless containers) · Cloud Monitoring · Cloud Logging · Cloud Trace (distributed tracing) · Binary Authorization (signed images only)</p>
+<p>GCP Pipeline Design:</p>
+<ol>
+<li>Source: Cloud Source Repositories / GitHub</li>
+<li>Trigger: push to main branch triggers Cloud Build</li>
+<li>Build (cloudbuild.yaml): run unit tests → build Docker image → push to Artifact Registry → security scan</li>
+<li>Deploy to Staging: Cloud Deploy → GKE staging cluster</li>
+<li>Test: integration + performance tests</li>
+<li>Promote: Cloud Deploy promotes to production GKE</li>
+<li>Monitor: Cloud Monitoring alerts on error rate spike</li>
+<li>Rollback: if SLO violated, trigger previous deployment</li>
+</ol>
+<p>GCP unique strengths: Autopilot GKE · Cloud Run (no K8s knowledge needed) · native GitHub/GitLab integration · SLSA framework for supply chain security</p>
+
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="card tilt-card">
+                    <div class="card-header">
+                        <h3 class="question">Design and explain a complete cloud-based DevOps pipeline using any major cloud provider. Include all stages from code to production.</h3>
+                        <span class="badge badge-10">10 MARKS</span>
+                    </div>
+                    <div class="answer-wrapper">
+                        <div class="answer-content">
+                            <p>Architecture: Developers → GitHub → AWS CodePipeline → EKS → Production</p>
+                            <img src="assets/cloud_architecture.png" alt="Cloud Architecture" class="content-image">
+                            <div class="mermaid">
+                                flowchart TD
+                                    User((User)) --> CF[CloudFront CDN]
+                                    CF --> R53[Route 53 DNS]
+                                    R53 --> IGW[Internet Gateway]
+                                    
+                                    subgraph AWS VPC
+                                        IGW --> ALB[Application Load Balancer]
+                                        
+                                        subgraph AZ-A
+                                            ALB --> WEB_A[Web EC2]
+                                            WEB_A --> APP_A[App EC2]
+                                            APP_A --> DB_P[(RDS Primary)]
+                                        end
+                                        
+                                        subgraph AZ-B
+                                            ALB --> WEB_B[Web EC2]
+                                            WEB_B --> APP_B[App EC2]
+                                            APP_B --> DB_S[(RDS Standby)]
+                                        end
+                                        
+                                        DB_P -.Sync.-> DB_S
+                                    end
+                            </div>
+<p>Stage 1 — Source Control (GitHub): feature branches · PR triggers code review · merge to main triggers pipeline · branch protection rules enforce CI</p>
+<p>Stage 2 — CI (AWS CodeBuild): buildspec.yml defines steps: `npm install` → `npm test` → `docker build` → `docker push ECR` · SonarCloud code quality gate · test results in CodeBuild reports</p>
+<p>Stage 3 — Artifact Management (ECR): Docker image tagged with commit SHA · immutable tags · vulnerability scanning · Binary Authorization (signed images only)</p>
+<p>Stage 4 — Deploy to Staging (CodeDeploy + EKS): K8s manifests updated with new image · Blue-green deployment · smoke tests · JMeter performance tests</p>
+<p>Stage 5 — Manual Approval Gate: CodePipeline pauses · stakeholder reviews staging · automated gate: error rate < 0.1% and latency p99 < 200ms → auto-approve</p>
+<p>Stage 6 — Production Deployment: Canary (5% traffic → new version) · CloudWatch monitors · if healthy after 10 min: 100% traffic shift · automatic rollback on metric degradation</p>
+<p>Stage 7 — Configuration Management (AWS Systems Manager): Parameter Store (app config) · Secrets Manager (auto-rotate DB passwords) · Session Manager (no SSH needed)</p>
+<p>Stage 8 — Monitoring (CloudWatch + X-Ray): dashboards (CPU, memory, request rate, errors) · Alarms → SNS → PagerDuty → on-call engineer · X-Ray distributed tracing · Logs Insights</p>
+<p>Infrastructure as Code (Terraform/CloudFormation): all resources in Git · dev/staging/prod from same template</p>
+<p>Security (DevSecOps): least-privilege IAM · private VPC subnets for EKS · WAF in front of load balancer · CodeGuru SAST</p>
+<p>DORA Metrics targets:</p>
+<ul>
+<li>Deployment frequency: multiple times/day</li>
+<li>Lead time for changes: < 1 hour</li>
+<li>Change failure rate: < 1%</li>
+<li>MTTR: < 30 minutes</li>
+</ul>
+
+                        </div>
+                    </div>
+                </div>
+        
+            </div>
+        </section>
+    
+</main>
+
+  <footer>
+    <p>CSE3253: DevOps &copy; 2026. Developed by <a href="https://karanpratap7.github.io/PORTFOLIO">Karan Pratap Singh</a>.</p>
+  </footer>
+
+  <!-- Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-groovy.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Utility: Add Copy buttons to code blocks
+    document.querySelectorAll('pre').forEach(pre => {
+      const btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.innerText = 'COPY';
+      pre.appendChild(btn);
+      btn.addEventListener('click', () => {
+        const code = pre.querySelector('code').innerText;
+        navigator.clipboard.writeText(code);
+        btn.innerText = 'COPIED!';
+        setTimeout(() => btn.innerText = 'COPY', 2000);
+      });
+    });
+
+    // Custom Scramble Text Effect
+    function scrambleText(element, finalString) {
+      const chars = '!<>-_\\/[]{}—=+*^?#_';
+      let frame = 0;
+      const length = finalString.length;
+      let output = '';
+
+      const render = () => {
+        output = '';
+        for (let i = 0; i < length; i++) {
+          if (frame > i * 2) {
+            output += finalString[i];
+          } else {
+            output += chars[Math.floor(Math.random() * chars.length)];
+          }
+        }
+        element.innerText = output;
+        if (frame < length * 2) {
+          frame++;
+          requestAnimationFrame(render);
+        }
+      };
+      render();
+    }
+
+    // Setup Three.js Background
+    const bgCanvas = document.getElementById('bg-canvas');
+    const bgScene = new THREE.Scene();
+    const bgCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const bgRenderer = new THREE.WebGLRenderer({ canvas: bgCanvas, alpha: true, antialias: true });
+    bgRenderer.setSize(window.innerWidth, window.innerHeight);
+    bgCamera.position.z = 5;
+
+    // Icosahedron wireframe
+    const geo = new THREE.IcosahedronGeometry(2, 0);
+    const mat = new THREE.MeshBasicMaterial({ color: 0x4F8EF7, wireframe: true, transparent: true, opacity: 0.1 });
+    const mesh = new THREE.Mesh(geo, mat);
+    bgScene.add(mesh);
+
+    // Setup Three.js Hero Particles (Infinity Loop Pipeline)
+    const heroCanvas = document.getElementById('hero-canvas');
+    const hScene = new THREE.Scene();
+    const hCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const hRenderer = new THREE.WebGLRenderer({ canvas: heroCanvas, alpha: true, antialias: true });
+    hRenderer.setSize(window.innerWidth, window.innerHeight);
+    hCamera.position.z = 30;
+
+    const pGeo = new THREE.BufferGeometry();
+    const pCount = 2000;
+    const posArray = new Float32Array(pCount * 3);
+
+    for (let i = 0; i < pCount * 3; i += 3) {
+      // parametric equation for infinity loop / figure 8
+      const t = Math.random() * Math.PI * 2;
+      const radius = 15;
+      posArray[i] = (radius * Math.sqrt(2) * Math.cos(t)) / (Math.sin(t) ** 2 + 1); // x
+      posArray[i + 1] = (radius * Math.sqrt(2) * Math.cos(t) * Math.sin(t)) / (Math.sin(t) ** 2 + 1); // y
+      posArray[i + 2] = (Math.random() - 0.5) * 5; // z jitter
+    }
+    pGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+    const pMat = new THREE.PointsMaterial({ size: 0.05, color: 0xf0ede8, transparent: true, opacity: 0.6 });
+    const pMesh = new THREE.Points(pGeo, pMat);
+    hScene.add(pMesh);
+
+    // Mouse tracking for 3D
+    let mouseX = 0;
+    let mouseY = 0;
+    document.addEventListener('mousemove', (e) => {
+      mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+      mouseY = -(e.clientY / window.innerHeight - 0.5) * 2;
+    });
+
+    const clock = new THREE.Clock();
+
+    function animate3D() {
+      requestAnimationFrame(animate3D);
+      const t = clock.getElapsedTime();
+
+      // bg mesh rotate
+      mesh.rotation.x = t * 0.1;
+      mesh.rotation.y = t * 0.15;
+
+      // hero particles subtle move
+      pMesh.rotation.y += 0.001;
+      pMesh.position.x += (mouseX * 2 - pMesh.position.x) * 0.05;
+      pMesh.position.y += (mouseY * 2 - pMesh.position.y) * 0.05;
+
+      bgRenderer.render(bgScene, bgCamera);
+      hRenderer.render(hScene, hCamera);
+    }
+    animate3D();
+
+    window.addEventListener('resize', () => {
+      bgCamera.aspect = window.innerWidth / window.innerHeight;
+      bgCamera.updateProjectionMatrix();
+      bgRenderer.setSize(window.innerWidth, window.innerHeight);
+
+      hCamera.aspect = window.innerWidth / window.innerHeight;
+      hCamera.updateProjectionMatrix();
+      hRenderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Master Animation Sequence
+    window.addEventListener('load', () => {
+      const tl = gsap.timeline();
+
+      // 1. Loader Counter
+      let counter = { val: 0 };
+      tl.to(counter, {
+        val: 100,
+        duration: 2,
+        ease: "power2.out",
+        onUpdate: () => {
+          document.querySelector('.loader-counter').innerText = Math.floor(counter.val).toString().padStart(3, '0') + '%';
+        }
+      });
+
+      // 2. Wipe Up Loader
+      tl.to(".loader", {
+        yPercent: -100,
+        duration: 1,
+        ease: "expo.inOut"
+      });
+
+      // 3. Reveal Hero Subtitle
+      tl.fromTo(".subtitle span i",
+        { y: "100%" },
+        { y: "0%", duration: 0.8, stagger: 0.1, ease: "power3.out" },
+        "-=0.5"
+      );
+
+      // ScrollTriggers
+
+      // Progress Bar
+      gsap.to(".progress-bar", {
+        width: "100%",
+        ease: "none",
+        scrollTrigger: {
+          trigger: "body",
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 0.3
+        }
+      });
+
+      // Hero Text Drift
+      gsap.to(".dev-text", {
+        x: "-50vw",
+        opacity: 0,
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".hero",
+          start: "top top",
+          end: "bottom top",
+          scrub: true
+        }
+      });
+      gsap.to(".ops-text", {
+        x: "50vw",
+        opacity: 0,
+        ease: "none",
+        scrollTrigger: {
+          trigger: ".hero",
+          start: "top top",
+          end: "bottom top",
+          scrub: true
+        }
+      });
+
+      // Module Reveal & Scramble Text
+      document.querySelectorAll(".module-section").forEach((sec, i) => {
+        const direction = i % 2 === 0 ? -50 : 50;
+
+        ScrollTrigger.create({
+          trigger: sec,
+          start: "top 80%",
+          onEnter: () => {
+            gsap.fromTo(sec,
+              { x: direction, opacity: 0 },
+              { x: 0, opacity: 1, duration: 1, ease: "power3.out" }
+            );
+            // Scramble title
+            const title = sec.querySelector('.scramble');
+            scrambleText(title, title.dataset.text);
+          },
+          once: true
+        });
+      });
+
+      // Active Nav link updates
+      const sections = document.querySelectorAll("section");
+      const navLinks = document.querySelectorAll(".nav-links a");
+
+      window.addEventListener("scroll", () => {
+        let current = "";
+        sections.forEach((section) => {
+          const sectionTop = section.offsetTop;
+          if (scrollY >= sectionTop - 200) {
+            current = section.getAttribute("id");
+          }
+        });
+
+        navLinks.forEach((link) => {
+          link.classList.remove("active");
+          if (link.getAttribute("href").includes(current)) {
+            link.classList.add("active");
+          }
+        });
+      });
+
+      // Smooth Anchor Scrolling with Flash Transition
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          const targetId = this.getAttribute('href');
+          const targetEl = document.querySelector(targetId);
+
+          if (document.querySelector('.mobile-menu').classList.contains('active')) {
+            toggleMobileMenu();
+          }
+
+          // Flash effect
+          gsap.to(".transition-flash", {
+            opacity: 1,
+            duration: 0.2,
+            onComplete: () => {
+              window.scrollTo({
+                top: targetEl.offsetTop,
+                behavior: 'instant'
+              });
+              gsap.to(".transition-flash", {
+                opacity: 0,
+                duration: 0.5,
+                ease: "power2.out"
+              });
+            }
+          });
+        });
+      });
+    });
+
+    // 3D Tilt Hover Effect for Cards
+    document.querySelectorAll('.tilt-card').forEach(card => {
+      card.addEventListener('mousemove', e => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+        const rotateX = ((y - centerY) / centerY) * -5;
+        const rotateY = ((x - centerX) / centerX) * 5;
+
+        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      });
+
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = `perspective(1000px) rotateX(0) rotateY(0)`;
+      });
+
+      // Accordion click
+      card.addEventListener('click', function () {
+        const wrapper = this.querySelector('.answer-wrapper');
+        const content = this.querySelector('.answer-content');
+
+        const isOpen = wrapper.style.height && wrapper.style.height !== '0px';
+
+        // close all others
+        document.querySelectorAll('.answer-wrapper').forEach(w => {
+          w.style.height = '0px';
+        });
+
+        if (!isOpen) {
+          wrapper.style.height = content.scrollHeight + 'px';
+        }
+      });
+    });
+
+    // Mobile Menu Toggle
+    const hamburger = document.querySelector('.hamburger');
+    const mobileMenu = document.querySelector('.mobile-menu');
+    const menuLinks = document.querySelectorAll('.mobile-menu a');
+    let menuOpen = false;
+
+    function toggleMobileMenu() {
+      menuOpen = !menuOpen;
+      if (menuOpen) {
+        mobileMenu.classList.add('active');
+        hamburger.innerText = '[ CLOSE ]';
+        gsap.to(menuLinks, {
+          y: 0,
+          opacity: 1,
+          duration: 0.5,
+          stagger: 0.1,
+          delay: 0.3,
+          ease: "power2.out"
+        });
+      } else {
+        mobileMenu.classList.remove('active');
+        hamburger.innerText = '[ MENU ]';
+        gsap.to(menuLinks, {
+          y: 20,
+          opacity: 0,
+          duration: 0.3
+        });
+      }
+    }
+
+    hamburger.addEventListener('click', toggleMobileMenu);
+
+  </script>
+</body>
+
+</html>
